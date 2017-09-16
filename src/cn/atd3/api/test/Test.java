@@ -35,20 +35,22 @@ public class Test {
 
 	public static void main(String[] args) {
 
-		JSONObject param = new JSONObject();
+		// 模拟存储的Cookie
 		cookies = new ArrayList<Cookie>();
-		// JSONObject param = new JSONObject();
-
+ 
+		// 设置控制器
 		Proxy.setController(new ProxyController() {
 			@Override
 			public List<Cookie> getCookies() {
+				// 获取Cookie
 				return cookies;
 			}
 
 			@Override
 			public boolean saveCookies(List<Cookie> list) {
 				cookies = list;
-				return false;
+				// 储存Cookie
+				return true;
 			}
 
 			@Override
@@ -64,20 +66,30 @@ public class Test {
 			}
 
 		});
+		
+		
 		try {
-			ProxyObject obj = new ProxyObject() {
+			// 设置调用的API对象接口
+			ProxyObject obj = new ProxyObject() {ַ
 				@Override
 				public String getCallUrl() {
-					return "http://safeyd.atd3.org/dx-dev.php/open-api/1.0/user";
+					return "http://safeyd.i.atd3.cn/open-api/1.0/user";
 				}
 
 			};
+			
+			// 参数 account=dxkite password=dxkite
+			JSONObject param = new JSONObject();
 			param.put("account", "dxkite");
 			param.put("password", "dxkite");
-
-			System.out.println(Proxy.call(obj, "signin", param));
-			System.out.println(Proxy.call(obj, "getInfo"));
-
+			// 登陆
+			System.out.println("signin =>"+Proxy.call(obj, "signin", param));
+			// 获取登陆信息
+			System.out.println("get user info=>"+Proxy.call(obj, "getInfo"));
+			// 退出登陆
+			System.out.println("signout=>"+Proxy.call(obj, "signout"));
+			// 尝试不登陆获取信息
+			System.out.println("get user info=>"+Proxy.call(obj, "getInfo"));
 		} catch (JSONException | ProxyException | ServerException e) {
 			e.printStackTrace();
 		}

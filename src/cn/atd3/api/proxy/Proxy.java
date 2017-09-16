@@ -18,6 +18,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import cn.atd3.api.proxy.exception.MethodNoFoundException;
+import cn.atd3.api.proxy.exception.PermissionException;
 import cn.atd3.api.proxy.exception.ProxyException;
 import cn.atd3.api.proxy.exception.ServerException;
 
@@ -43,7 +45,7 @@ public class Proxy {
 		Proxy.timeOut = timeOut;
 	}
 
-	public static JSONObject call(ProxyObject obj, String method, JSONArray param)
+	public static Object call(ProxyObject obj, String method, JSONArray param)
 			throws JSONException, ServerException {
 		JSONObject post = new JSONObject();
 		post.put("jsonrpc", "2.0");
@@ -51,20 +53,20 @@ public class Proxy {
 		post.put("params", param);
 		post.put("id", ++callid);
 		System.out.println("send_str =>" + post);
-		return new JSONObject(downloadJson(obj.getCallUrl(), method, post.toString()));
+		return parseJsonObject(downloadJson(obj.getCallUrl(), method, post.toString()));
 	}
 
-	public static JSONObject call(ProxyObject obj, String method) throws JSONException, ServerException {
+	public static Object call(ProxyObject obj, String method) throws JSONException, ServerException {
 		JSONObject post = new JSONObject();
 		post.put("jsonrpc", "2.0");
 		post.put("method", method);
 		post.put("params", new JSONArray());
 		post.put("id", ++callid);
 		System.out.println("send_str =>" + post);
-		return new JSONObject(downloadJson(obj.getCallUrl(), method, post.toString()));
+		return parseJsonObject(downloadJson(obj.getCallUrl(), method, post.toString()));
 	}
 
-	public static JSONObject call(ProxyObject obj, String method, JSONObject param)
+	public static Object call(ProxyObject obj, String method, JSONObject param)
 			throws JSONException, ProxyException, ServerException {
 		JSONObject post = new JSONObject();
 		post.put("jsonrpc", "2.0");
@@ -72,7 +74,31 @@ public class Proxy {
 		post.put("params", param);
 		post.put("id", ++callid);
 		System.out.println("send_str =>" + post);
-		return new JSONObject(downloadJson(obj.getCallUrl(), method, post.toString()));
+		return parseJsonObject(downloadJson(obj.getCallUrl(), method, post.toString()));
+	}
+
+	private static Object parseJsonObject(String returnStr) throws JSONException {
+		JSONObject obj = new JSONObject(returnStr);
+		if (obj.has("result")) {
+			return obj.get("result");
+		} else {
+			if (obj.has("error")) {
+				JSONObject error = obj.getJSONObject("error");
+				int code = error.getInt("code");
+				switch (code) {
+				case -32601:
+					throw new MethodNoFoundException(error.getString("message"));
+				case -32610:
+					throw new PermissionException(error.getString("message"));
+				case -32600:
+				case -32603:
+				case -32602:
+				default:
+					throw new ProxyException(error.getString("message"));
+				}
+			}
+		}
+		return obj;
 	}
 
 	private static String downloadJson(String callUrl, String method, String content) throws ServerException {
@@ -108,14 +134,6 @@ public class Proxy {
 			throw new ServerException("Server status error (" + resp.getStatusLine().getStatusCode() + ")");
 		}
 		return response;
-	}
-
-	public static File callFile(ProxyObject obj, String method, JSONObject param) {
-		return null;
-	}
-
-	protected static String downloadJson(String path, JSONObject post) {
-		return null;
 	}
 
 	protected static String downloadFile(String path, JSONObject post) {
