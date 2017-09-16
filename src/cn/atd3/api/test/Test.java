@@ -70,7 +70,7 @@ public class Test {
 		
 		try {
 			// 设置调用的API对象接口
-			ProxyObject obj = new ProxyObject() {ַ
+			ProxyObject obj = new ProxyObject() {
 				@Override
 				public String getCallUrl() {
 					return "http://safeyd.i.atd3.cn/open-api/1.0/user";
