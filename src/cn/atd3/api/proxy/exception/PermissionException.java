@@ -1,6 +1,6 @@
 package cn.atd3.api.proxy.exception;
 
-public class PermissionException extends ProxyException {
+public class PermissionException extends Exception {
 
 	/**
 	 * 
