@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import org.apache.http.cookie.Cookie;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import cn.atd3.api.proxy.Param;
@@ -18,40 +18,48 @@ import cn.atd3.api.proxy.exception.ProxyException;
 import cn.atd3.api.proxy.exception.ServerException;
 
 public class Test {
-	static List<Cookie> cookies;
-	final static String downloadFileTestPath = "D:\\cover.jpg";
-	final static String uploadFileTestPath = "D:\\cover.jpg";
+	static Map<String, String> cookie_save;
+	final static String downloadFileTestPath = "D:\\some.txt";
+	final static String uploadFileTestPath = "D:\\some.txt";
 	// 初始化
 	static {
 		// 模拟存储的Cookie
-		cookies = new ArrayList<Cookie>();
-
+		cookie_save = new HashMap<String, String>();
 		// 设置控制器
 		Proxy.setController(new ProxyController() {
 			@Override
-			public List<Cookie> getCookies() {
-				// 获取Cookie
-				return cookies;
-			}
-
-			@Override
-			public boolean saveCookies(List<Cookie> list) {
-				cookies = list;
-				// 储存Cookie
-				return true;
-			}
-
-			@Override
 			public File saveFile(String mime, InputStream content, long contentLength) {
-				System.out.println(mime + ":" + contentLength);
+				System.out.println("save file =>"+mime + ":" + contentLength);
 				// 模拟保存文件并返回句柄
 				return new File(downloadFileTestPath);
+			}
+
+			@Override
+			public String getCookies() {
+				StringBuffer cookie_str = new StringBuffer();
+				for (Map.Entry<String, String> cookie : cookie_save.entrySet()) {
+					cookie_str.append(cookie.getKey() + "=" + cookie.getValue() + ";");
+				}
+				System.out.println("send cookie => " + cookie_str);
+				return cookie_str.toString();
+			}
+
+			@Override
+			public boolean saveCookies(String cookies) {
+				System.out.println("set cookie =>" + cookies);
+				if (cookies != null) {
+					String cookiestr = cookies.substring(0, cookies.indexOf(";"));
+					int pos = cookiestr.indexOf("=");
+					cookie_save.put(cookiestr.substring(0, pos), cookiestr.substring(pos + 1));
+				}
+				return false;
 			}
 		});
 
 	}
 
 	public static void main(String[] args) {
+		// Proxy.setTimeOut(30000);
 		// 测试登陆
 		testUser();
 		// 测试登陆（参数简单化）
@@ -77,7 +85,9 @@ public class Test {
 		try {
 			// 获取封面
 			System.out.println("获取封面文件：");
-			System.out.println("get cover => " + new Proxy(articleProxy, "getCover", true).call(1));
+			System.out.println(
+					"get cover file => " + new Proxy(articleProxy, "getCover", true).call(new Param("article", 1)));
+			System.out.println("get cover json => " + new Proxy(articleProxy, "getCover").call(1));
 		} catch (ProxyException | JSONException | ServerException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
