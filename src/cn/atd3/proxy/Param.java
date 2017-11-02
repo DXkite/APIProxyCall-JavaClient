@@ -1,4 +1,4 @@
-package cn.atd3.api.proxy;
+package cn.atd3.proxy;
 
 public class Param {
 	String name;

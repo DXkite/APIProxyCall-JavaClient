@@ -1,4 +1,4 @@
-package cn.atd3.api.proxy;
+package cn.atd3.proxy;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,10 +16,11 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import cn.atd3.api.proxy.exception.MethodNoFoundException;
-import cn.atd3.api.proxy.exception.PermissionException;
-import cn.atd3.api.proxy.exception.ProxyException;
-import cn.atd3.api.proxy.exception.ServerException;
+
+import cn.atd3.proxy.exception.MethodNoFoundException;
+import cn.atd3.proxy.exception.PermissionException;
+import cn.atd3.proxy.exception.ProxyException;
+import cn.atd3.proxy.exception.ServerException;
 
 public class Proxy {
 	protected static ProxyController controller = null;

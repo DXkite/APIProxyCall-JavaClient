@@ -1,4 +1,4 @@
-package cn.atd3.api.test;
+package cn.atd3.test;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,13 +7,14 @@ import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import cn.atd3.api.proxy.Param;
-import cn.atd3.api.proxy.Proxy;
-import cn.atd3.api.proxy.ProxyController;
-import cn.atd3.api.proxy.ProxyObject;
-import cn.atd3.api.proxy.exception.PermissionException;
-import cn.atd3.api.proxy.exception.ProxyException;
-import cn.atd3.api.proxy.exception.ServerException;
+
+import cn.atd3.proxy.Param;
+import cn.atd3.proxy.Proxy;
+import cn.atd3.proxy.ProxyController;
+import cn.atd3.proxy.ProxyObject;
+import cn.atd3.proxy.exception.PermissionException;
+import cn.atd3.proxy.exception.ProxyException;
+import cn.atd3.proxy.exception.ServerException;
 
 public class Test {
 	static Map<String, String> cookie_save;

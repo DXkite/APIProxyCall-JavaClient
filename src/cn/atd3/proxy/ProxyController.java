@@ -1,4 +1,4 @@
-package cn.atd3.api.proxy;
+package cn.atd3.proxy;
 
 import java.io.File;
 import java.io.InputStream;

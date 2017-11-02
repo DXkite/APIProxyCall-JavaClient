@@ -1,4 +1,4 @@
-package cn.atd3.api.proxy.exception;
+package cn.atd3.proxy.exception;
 
 public class PermissionException extends Exception {
 

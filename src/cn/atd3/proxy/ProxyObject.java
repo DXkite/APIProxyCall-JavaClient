@@ -1,4 +1,4 @@
-package cn.atd3.api.proxy;
+package cn.atd3.proxy;
 
 public interface ProxyObject {
 	public String getCallUrl();
