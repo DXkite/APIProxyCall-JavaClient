@@ -58,7 +58,7 @@ public class Function {
 	 * @throws IOException
 	 * @throws PermissionException
 	 */
-	public Object args(Object... params) throws JSONException, ServerException, IOException, PermissionException {
+	public Object call(Object... params) throws JSONException, ServerException, IOException, PermissionException {
 		// check if has file
 		for (Object param : params) {
 			if (param instanceof File) {
@@ -69,7 +69,7 @@ public class Function {
 		for (Object param : params) {
 			jsonparam.add(param);
 		}
-		return args(jsonparam);
+		return call(jsonparam);
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class Function {
 	 * @throws IOException
 	 * @throws PermissionException
 	 */
-	public Object args(Param... params)
+	public Object call(Param... params)
 			throws JSONException, ProxyException, ServerException, IOException, PermissionException {
 		boolean hasFile = false;
 		// check if has file
@@ -104,7 +104,7 @@ public class Function {
 			for (Param param : params) {
 				jsonparams.put(param.getName(), param.getObject());
 			}
-			return args(jsonparams);
+			return call(jsonparams);
 		}
 	}
 
@@ -138,7 +138,7 @@ public class Function {
 	 * @throws IOException
 	 * @throws PermissionException
 	 */
-	public Object args(JSONArray param) throws JSONException, ServerException, IOException, PermissionException {
+	public Object call(JSONArray param) throws JSONException, ServerException, IOException, PermissionException {
 		if (returnFile) {
 			return parseObject(download(this.object.getCallUrl(), method, param.toString()));
 		}
@@ -160,7 +160,7 @@ public class Function {
 	 * @throws IOException
 	 * @throws PermissionException
 	 */
-	public Object args(JSONObject param)
+	public Object call(JSONObject param)
 			throws JSONException, ProxyException, ServerException, IOException, PermissionException {
 		if (returnFile) {
 			return parseObject(download(this.object.getCallUrl(), method, param.toString()));

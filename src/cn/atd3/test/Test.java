@@ -73,7 +73,7 @@ public class Test {
 
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] call) {
 		// Proxy.setTimeOut(30000);
 		// 测试登陆
 		testUser();
@@ -94,8 +94,8 @@ public class Test {
 			// 获取封面
 			System.out.println("获取封面文件：");
 			System.out.println(
-					"get cover file => " + new Function(articleProxy, "getCover", true).args(new Param("article", 1)));
-			System.out.println("get cover json => " + new Function(articleProxy, "getCover").args(1));
+					"get cover file => " + new Function(articleProxy, "getCover", true).call(new Param("article", 1)));
+			System.out.println("get cover json => " + new Function(articleProxy, "getCover").call(1));
 		} catch (ProxyException | JSONException | ServerException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -111,10 +111,10 @@ public class Test {
 		try {
 			// 登陆
 			System.out.println("登陆账号：");
-			System.out.println("signin =>" + new Function(userProxy, "signin").args("test", "test_password"));
+			System.out.println("signin =>" + new Function(userProxy, "signin").call("test", "test_password"));
 			// 设置封面
 			System.out.println("设置封面：");
-			System.out.println("set cover => " + new Function(articleProxy, "setCover").args(new Param("article", 1),
+			System.out.println("set cover => " + new Function(articleProxy, "setCover").call(new Param("article", 1),
 					new Param("cover", new File(uploadFileTestPath))));
 		} catch (ProxyException | JSONException | ServerException | IOException e) {
 			// TODO Auto-generated catch block
@@ -131,7 +131,7 @@ public class Test {
 		// 设置参数
 		try {
 			System.out.println("设置封面：");
-			System.out.println("return => " + new Function(articleProxy, "setCover").args(new Param("article", 1),
+			System.out.println("return => " + new Function(articleProxy, "setCover").call(new Param("article", 1),
 					new Param("cover", new File(uploadFileTestPath))));
 		} catch (ProxyException | JSONException | ServerException | IOException e) {
 			// TODO Auto-generated catch block
@@ -147,7 +147,7 @@ public class Test {
 		try {
 			// 登陆
 			System.out.println("登陆：account=test,password=test_password");
-			System.out.println("signin =>" + new Function(userProxy, "signin").args("test", "test_password"));
+			System.out.println("signin =>" + new Function(userProxy, "signin").call("test", "test_password"));
 			// 获取登陆信息
 			System.out.println("获取登陆信息：");
 			
@@ -176,7 +176,7 @@ public class Test {
 			param.put("password", "test_password");
 			// 登陆
 			System.out.println("登陆：account=dxkite ,password=dxkite");
-			System.out.println("signin =>" + new Function(userProxy, "signin").args(param));
+			System.out.println("signin =>" + new Function(userProxy, "signin").call(param));
 			// 获取登陆信息
 			System.out.println("获取登陆信息：");
 			System.out.println("get user info=>" + new Function(userProxy, "getInfo").call());
