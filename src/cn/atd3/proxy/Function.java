@@ -32,7 +32,16 @@ public class Function {
 		this.method = method;
 		this.returnFile = false;
 	}
-
+	
+	public Function setReturnType(Class<?> returnType) {
+		this.returnType = returnType;
+		return this;
+	}
+	
+	public Class<?> getReturnType() {
+		return returnType;
+	}
+	
 	public Function(ProxyObject object, String method, Class<?> returnType) {
 		this.object = object;
 		this.method = method;
