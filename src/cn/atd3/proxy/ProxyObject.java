@@ -5,7 +5,7 @@ public abstract class ProxyObject {
 
 	public abstract String getCallUrl();
 
-	ProxyObject setReturnType(Class<?> returnType) {
+	public ProxyObject setReturnType(Class<?> returnType) {
 		this.returnType = returnType;
 		return this;
 	}
@@ -14,7 +14,7 @@ public abstract class ProxyObject {
 		return returnType;
 	}
 
-	Function method(String name) {
+	public Function method(String name) {
 		if (returnType != null) {
 			return new Function(this, name, returnType);
 		}

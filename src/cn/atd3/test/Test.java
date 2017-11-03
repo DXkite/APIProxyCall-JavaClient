@@ -152,7 +152,7 @@ public class Test {
 			System.out.println("获取登陆信息：");
 			
 			// 适配 JavaBean
-			UserInfo userInfo=(UserInfo)new Function(userProxy, "getInfo",UserInfo.class) .call();
+			UserInfo userInfo=(UserInfo) userProxy.setReturnType(UserInfo.class).method("getInfo").call();
 			System.out.println("get user info=>" + userInfo);
 			
 			// 退出登陆
