@@ -13,53 +13,44 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.alibaba.fastjson.*;
 
 import cn.atd3.proxy.exception.MethodNoFoundException;
 import cn.atd3.proxy.exception.PermissionException;
 import cn.atd3.proxy.exception.ProxyException;
 import cn.atd3.proxy.exception.ServerException;
 
-public class Proxy {
-	protected static ProxyController controller = null;
-	protected static Integer timeOut = 3000;
-	protected static Integer callid = 0;
+public class Function {
+
 	protected ProxyObject object;
 	protected String method;
 	protected boolean returnFile = false;
+	protected Class<?> returnType = null;
 
-	public Proxy(ProxyObject object, String method) {
+	public Function(ProxyObject object, String method) {
 		this.object = object;
 		this.method = method;
 		this.returnFile = false;
 	}
 
-	public Proxy(ProxyObject object, String method, boolean returnFile) {
+	public Function(ProxyObject object, String method, Class<?> returnType) {
+		this.object = object;
+		this.method = method;
+		this.returnType = returnType;
+		if (returnType.getName().equals(File.class.getName())) {
+			this.returnFile = true;
+		}
+	}
+
+	public Function(ProxyObject object, String method, boolean returnFile) {
 		this.object = object;
 		this.method = method;
 		this.returnFile = returnFile;
 	}
 
-	public static ProxyController getController() {
-		return controller;
-	}
-
-	public static void setController(ProxyController controller) {
-		Proxy.controller = controller;
-	}
-
-	public static Integer getTimeOut() {
-		return timeOut;
-	}
-
-	public static void setTimeOut(Integer timeOut) {
-		Proxy.timeOut = timeOut;
-	}
-	
 	/**
 	 * 顺序参数调用，不支持文件
+	 * 
 	 * @param params
 	 * @return
 	 * @throws JSONException
@@ -67,22 +58,23 @@ public class Proxy {
 	 * @throws IOException
 	 * @throws PermissionException
 	 */
-	public Object call(Object... params) throws JSONException, ServerException, IOException, PermissionException {
+	public Object args(Object... params) throws JSONException, ServerException, IOException, PermissionException {
 		// check if has file
 		for (Object param : params) {
 			if (param instanceof File) {
 				throw new ProxyException("File params must use Param class to post");
 			}
 		}
-		JSONArray jsonparam = new JSONArray();
+		JSONArray jsonparam = new com.alibaba.fastjson.JSONArray();
 		for (Object param : params) {
-			jsonparam.put(param);
+			jsonparam.add(param);
 		}
-		return call(jsonparam);
+		return args(jsonparam);
 	}
-	
+
 	/**
 	 * 关联参数调用 支持文件
+	 * 
 	 * @param params
 	 * @return
 	 * @throws JSONException
@@ -91,7 +83,7 @@ public class Proxy {
 	 * @throws IOException
 	 * @throws PermissionException
 	 */
-	public Object call(Param... params)
+	public Object args(Param... params)
 			throws JSONException, ProxyException, ServerException, IOException, PermissionException {
 		boolean hasFile = false;
 		// check if has file
@@ -112,12 +104,13 @@ public class Proxy {
 			for (Param param : params) {
 				jsonparams.put(param.getName(), param.getObject());
 			}
-			return call(jsonparams);
+			return args(jsonparams);
 		}
 	}
-	
+
 	/**
 	 * 无参数调用
+	 * 
 	 * @return
 	 * @throws JSONException
 	 * @throws ServerException
@@ -131,12 +124,13 @@ public class Proxy {
 		JSONObject post = new JSONObject();
 		post.put("method", method);
 		post.put("params", new JSONArray());
-		post.put("id", ++callid);
+		post.put("id", ++ProxyConfig.callid);
 		return parseObject(download(this.object.getCallUrl(), method, post.toString()));
 	}
-	
+
 	/**
 	 * 数组参数调用
+	 * 
 	 * @param param
 	 * @return
 	 * @throws JSONException
@@ -144,19 +138,20 @@ public class Proxy {
 	 * @throws IOException
 	 * @throws PermissionException
 	 */
-	public Object call(JSONArray param) throws JSONException, ServerException, IOException, PermissionException {
+	public Object args(JSONArray param) throws JSONException, ServerException, IOException, PermissionException {
 		if (returnFile) {
 			return parseObject(download(this.object.getCallUrl(), method, param.toString()));
 		}
 		JSONObject post = new JSONObject();
 		post.put("method", method);
 		post.put("params", param);
-		post.put("id", ++callid);
+		post.put("id", ++ProxyConfig.callid);
 		return parseObject(download(this.object.getCallUrl(), method, post.toString()));
 	}
 
 	/**
 	 * 关联参数调用
+	 * 
 	 * @param param
 	 * @return
 	 * @throws JSONException
@@ -165,7 +160,7 @@ public class Proxy {
 	 * @throws IOException
 	 * @throws PermissionException
 	 */
-	public Object call(JSONObject param)
+	public Object args(JSONObject param)
 			throws JSONException, ProxyException, ServerException, IOException, PermissionException {
 		if (returnFile) {
 			return parseObject(download(this.object.getCallUrl(), method, param.toString()));
@@ -173,19 +168,28 @@ public class Proxy {
 		JSONObject post = new JSONObject();
 		post.put("method", method);
 		post.put("params", param);
-		post.put("id", ++callid);
+		post.put("id", ++ProxyConfig.callid);
 		return parseObject(download(this.object.getCallUrl(), method, post.toString()));
 	}
 
-	
-	private static Object parseObject(Object object) throws JSONException, PermissionException {
+	private Object parseObject(Object object) throws JSONException, PermissionException {
 		if (object instanceof JSONObject) {
 			JSONObject obj = (JSONObject) object;
 			System.out.println("parse json object => " + obj);
-			if (obj.has("result")) {
-				return obj.get("result");
+			if (obj.containsKey("result")) {
+				Object result = obj.get("result");
+				if (returnType != null) {
+					if (result instanceof JSONObject) {
+						return JSON.toJavaObject((JSONObject) result, returnType);
+					}
+					if (result instanceof JSONArray) {
+						return JSON.toJavaObject((JSONArray) result, returnType);
+					}
+
+				}
+				return result;
 			} else {
-				if (obj.has("error")) {
+				if (obj.containsKey("error")) {
 					JSONObject error = obj.getJSONObject("error");
 					String name = error.getString("name");
 					if ("PermissionDeny".equalsIgnoreCase(name)) {
@@ -209,7 +213,7 @@ public class Proxy {
 		} else {
 			postAddress = callUrl;
 		}
-		System.out.println("send json => "+content);
+		System.out.println("send json => " + content);
 		HttpURLConnection httpUrlConnection = createConnection(postAddress);
 		httpUrlConnection.setRequestMethod("POST");
 		httpUrlConnection.setRequestProperty("Content-Type", "application/json");
@@ -226,19 +230,20 @@ public class Proxy {
 
 	private Object download(String callUrl, String method, List<Param> params)
 			throws ServerException, JSONException, IOException {
-		HttpURLConnection httpUrlConnection = createConnection(callUrl+"?method="+method);
+		HttpURLConnection httpUrlConnection = createConnection(callUrl + "?method=" + method);
 		httpUrlConnection.setRequestMethod("POST");
-		String boundary = "----ProxyCallFormBoundary" + System.currentTimeMillis()+callid;
-		httpUrlConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary="+ boundary);
+		String boundary = "----ProxyCallFormBoundary" + System.currentTimeMillis() + ProxyConfig.callid;
+		httpUrlConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 		httpUrlConnection.connect();
-		OutputStream outputStream=httpUrlConnection.getOutputStream();
-		for (Param param:params){
-			outputStream.write(("--"+boundary+"\r\n").getBytes());
-			if(param.object instanceof File){
-				File file=(File) param.object;
-				String contentType=URLConnection.getFileNameMap().getContentTypeFor(file.getName());
-				outputStream.write(("Content-Disposition: multipart/form-data; name=\""+param.name+"\"; filename=\""+ file.getName() +"\"\r\n").getBytes());
-				outputStream.write(("Content-Type: "+contentType+"\r\n\r\n").getBytes());
+		OutputStream outputStream = httpUrlConnection.getOutputStream();
+		for (Param param : params) {
+			outputStream.write(("--" + boundary + "\r\n").getBytes());
+			if (param.object instanceof File) {
+				File file = (File) param.object;
+				String contentType = URLConnection.getFileNameMap().getContentTypeFor(file.getName());
+				outputStream.write(("Content-Disposition: multipart/form-data; name=\"" + param.name + "\"; filename=\""
+						+ file.getName() + "\"\r\n").getBytes());
+				outputStream.write(("Content-Type: " + contentType + "\r\n\r\n").getBytes());
 				@SuppressWarnings("resource")
 				InputStream input = new FileInputStream(file);
 				int bytes = 0;
@@ -247,41 +252,42 @@ public class Proxy {
 					outputStream.write(bufferOut, 0, bytes);
 					outputStream.write(("\r\n").getBytes());
 				}
-			}else{
-				outputStream.write(("Content-Disposition: form-data; name=\""+param.name+"\"\r\n\r\n").getBytes());
-				outputStream.write((param.object.toString()+"\r\n").getBytes());
+			} else {
+				outputStream.write(("Content-Disposition: form-data; name=\"" + param.name + "\"\r\n\r\n").getBytes());
+				outputStream.write((param.object.toString() + "\r\n").getBytes());
 			}
 		}
-		outputStream.write(("--"+boundary+"\r\n").getBytes());
+		outputStream.write(("--" + boundary + "\r\n").getBytes());
 		outputStream.close();
 		Object result = parseResponse(httpUrlConnection);
 		httpUrlConnection.disconnect();
 		return result;
 	}
-	
-	protected  HttpURLConnection createConnection(String postAddress) throws IOException{
+
+	protected HttpURLConnection createConnection(String postAddress) throws IOException {
 		// 创建连接
 		HttpURLConnection httpUrlConnection = (HttpURLConnection) new URL(postAddress).openConnection();
 		// 设置服务器属性
 		httpUrlConnection.setDoOutput(true);
 		httpUrlConnection.setDoInput(true);
 		httpUrlConnection.setUseCaches(false);
-		httpUrlConnection.setConnectTimeout(timeOut);
-		httpUrlConnection.setReadTimeout(timeOut);
-		String cookies = controller.getCookies();
+		httpUrlConnection.setConnectTimeout(ProxyConfig.timeOut);
+		httpUrlConnection.setReadTimeout(ProxyConfig.timeOut);
+		String cookies = ProxyConfig.controller.getCookies();
 		if (cookies != null && !cookies.isEmpty()) {
 			httpUrlConnection.setRequestProperty("Cookie", cookies);
 		}
 		return httpUrlConnection;
 	}
-	
-	protected static Object parseResponse(HttpURLConnection httpUrlConnection) throws ServerException, JSONException, IOException {
+
+	protected static Object parseResponse(HttpURLConnection httpUrlConnection)
+			throws ServerException, JSONException, IOException {
 		// save cookie
 		List<String> cookie_list = httpUrlConnection.getHeaderFields().get("Set-Cookie");
-		if(cookie_list!=null){
+		if (cookie_list != null) {
 			for (String cookie : cookie_list) {
-				controller.saveCookies(cookie);
-			}		
+				ProxyConfig.controller.saveCookies(cookie);
+			}
 		}
 		if (httpUrlConnection.getResponseCode() == 200) {
 			// JSON
@@ -295,14 +301,14 @@ public class Proxy {
 					while (null != (l = r.readLine())) {
 						jsonstr += l + '\n';
 					}
-					return new JSONObject(jsonstr);
+					return JSON.parse(jsonstr);
 				} catch (IOException e) {
 					throw new ServerException("Server response read error", e);
 				}
 			} else {
 				System.out.println("content is not json => " + httpUrlConnection.getContentType());
-				return controller.saveFile(httpUrlConnection.getContentType(), httpUrlConnection.getInputStream(),
-						httpUrlConnection.getContentLength());
+				return ProxyConfig.controller.saveFile(httpUrlConnection.getContentType(),
+						httpUrlConnection.getInputStream(), httpUrlConnection.getContentLength());
 			}
 		} else {
 			throw new ServerException("Server status error (" + httpUrlConnection.getResponseCode() + ")");
