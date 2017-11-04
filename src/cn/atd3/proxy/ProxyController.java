@@ -16,12 +16,12 @@ public interface ProxyController {
 	 * @param cookies
 	 * @return
 	 */
-	public boolean saveCookies(String cookies);
+	public boolean saveCookie(String cookies);
 
 	/**
 	 * 保存从服务器下载的文件
-	 * @param contentType
-	 * @param content
+	 * @param contentType 文件MIME类型
+	 * @param content 
 	 * @param contentLength
 	 * @return
 	 */

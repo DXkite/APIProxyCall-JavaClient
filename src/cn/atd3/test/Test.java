@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import com.alibaba.fastjson.*;
 
@@ -38,6 +39,7 @@ public class Test {
 				return "http://code4a.i.atd3.cn/open-api/1.0/user";
 			}
 		};
+		
 		// 模拟存储的Cookie
 		cookie_save = new HashMap<String, String>();
 		// 设置控制器
@@ -60,7 +62,7 @@ public class Test {
 			}
 
 			@Override
-			public boolean saveCookies(String cookies) {
+			public boolean saveCookie(String cookies) {
 				System.out.println("set cookie =>" + cookies);
 				if (cookies != null) {
 					String cookiestr = cookies.substring(0, cookies.indexOf(";"));
@@ -74,19 +76,39 @@ public class Test {
 	}
 
 	public static void main(String[] call) {
-		// Proxy.setTimeOut(30000);
+		ProxyConfig.setTimeOut(30000);
+		testGetArticleList();
 		// 测试登陆
-		testUser();
+//		testUser();
 		// 测试登陆（参数简单化）
-		testUserEasy();
+//		testUserEasy();
 		// 测试设置文章封面（文件上传、权限报错）
-		testSetCoverWithoutSign();
+//		testSetCoverWithoutSign();
 		// 测试设置封面
-		testSetCoverWithSign();
+//		testSetCoverWithSign();
 		// 测试获取封面（文件下载）
-		testGetCover();
+//		testGetCover();
 	}
-
+	
+	private static void testGetArticleList() {
+		try {
+			List<Article> list=(List<Article>) articleProxy.method("getList",Article.class).call(1,10);
+			System.out.println(list);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PermissionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	private static void testGetCover() {
 
 		// 设置参数

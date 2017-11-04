@@ -22,15 +22,42 @@ import cn.atd3.proxy.exception.ServerException;
 
 public class Function {
 
-	protected ProxyObject object;
+	protected String remoteAddress;
 	protected String method;
 	protected boolean returnFile = false;
 	protected Class<?> returnType = null;
 
 	public Function(ProxyObject object, String method) {
-		this.object = object;
+		this(object.getCallUrl(),method);
+	}
+
+	public Function(ProxyObject object, String method, Class<?> returnType) {
+		this(object.getCallUrl(),method,returnType);
+	}
+	
+	public Function(ProxyObject object, String method, boolean returnFile) {
+		this(object.getCallUrl(),method,returnFile);
+	}
+	
+	public Function(String remoteAddress, String method) {
+		this.remoteAddress = remoteAddress;
 		this.method = method;
 		this.returnFile = false;
+	}
+	
+	public Function(String remoteAddress, String method, Class<?> returnType) {
+		this.remoteAddress = remoteAddress;
+		this.method = method;
+		this.returnType = returnType;
+		if (returnType.getName().equals(File.class.getName())) {
+			this.returnFile = true;
+		}
+	}
+	
+	public Function(String remoteAddress, String method, boolean returnFile) {
+		this.remoteAddress = remoteAddress;
+		this.method = method;
+		this.returnFile = returnFile;
 	}
 	
 	public Function setReturnType(Class<?> returnType) {
@@ -42,21 +69,6 @@ public class Function {
 		return returnType;
 	}
 	
-	public Function(ProxyObject object, String method, Class<?> returnType) {
-		this.object = object;
-		this.method = method;
-		this.returnType = returnType;
-		if (returnType.getName().equals(File.class.getName())) {
-			this.returnFile = true;
-		}
-	}
-
-	public Function(ProxyObject object, String method, boolean returnFile) {
-		this.object = object;
-		this.method = method;
-		this.returnFile = returnFile;
-	}
-
 	/**
 	 * 顺序参数调用，不支持文件
 	 * 
@@ -107,7 +119,7 @@ public class Function {
 			for (Param param : params) {
 				list.add(param);
 			}
-			return parseObject(download(this.object.getCallUrl(), method, list));
+			return parseObject(download(this.remoteAddress, method, list));
 		} else {
 			JSONObject jsonparams = new JSONObject();
 			for (Param param : params) {
@@ -128,13 +140,13 @@ public class Function {
 	 */
 	public Object call() throws JSONException, ServerException, IOException, PermissionException {
 		if (returnFile) {
-			return parseObject(download(this.object.getCallUrl(), method, new JSONArray().toString()));
+			return parseObject(download(this.remoteAddress, method, new JSONArray().toString()));
 		}
 		JSONObject post = new JSONObject();
 		post.put("method", method);
 		post.put("params", new JSONArray());
 		post.put("id", ++ProxyConfig.callid);
-		return parseObject(download(this.object.getCallUrl(), method, post.toString()));
+		return parseObject(download(this.remoteAddress, method, post.toString()));
 	}
 
 	/**
@@ -149,13 +161,13 @@ public class Function {
 	 */
 	public Object call(JSONArray param) throws JSONException, ServerException, IOException, PermissionException {
 		if (returnFile) {
-			return parseObject(download(this.object.getCallUrl(), method, param.toString()));
+			return parseObject(download(this.remoteAddress, method, param.toString()));
 		}
 		JSONObject post = new JSONObject();
 		post.put("method", method);
 		post.put("params", param);
 		post.put("id", ++ProxyConfig.callid);
-		return parseObject(download(this.object.getCallUrl(), method, post.toString()));
+		return parseObject(download(this.remoteAddress, method, post.toString()));
 	}
 
 	/**
@@ -172,13 +184,13 @@ public class Function {
 	public Object call(JSONObject param)
 			throws JSONException, ProxyException, ServerException, IOException, PermissionException {
 		if (returnFile) {
-			return parseObject(download(this.object.getCallUrl(), method, param.toString()));
+			return parseObject(download(this.remoteAddress, method, param.toString()));
 		}
 		JSONObject post = new JSONObject();
 		post.put("method", method);
 		post.put("params", param);
 		post.put("id", ++ProxyConfig.callid);
-		return parseObject(download(this.object.getCallUrl(), method, post.toString()));
+		return parseObject(download(this.remoteAddress, method, post.toString()));
 	}
 
 	private Object parseObject(Object object) throws JSONException, PermissionException {
@@ -192,7 +204,7 @@ public class Function {
 						return JSON.toJavaObject((JSONObject) result, returnType);
 					}
 					if (result instanceof JSONArray) {
-						return JSON.toJavaObject((JSONArray) result, returnType);
+						return JSON.parseArray(result.toString(), returnType);
 					}
 
 				}
@@ -295,7 +307,7 @@ public class Function {
 		List<String> cookie_list = httpUrlConnection.getHeaderFields().get("Set-Cookie");
 		if (cookie_list != null) {
 			for (String cookie : cookie_list) {
-				ProxyConfig.controller.saveCookies(cookie);
+				ProxyConfig.controller.saveCookie(cookie);
 			}
 		}
 		if (httpUrlConnection.getResponseCode() == 200) {
