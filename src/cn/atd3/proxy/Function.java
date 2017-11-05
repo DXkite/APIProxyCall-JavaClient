@@ -244,7 +244,7 @@ public class Function {
 		outputStream.write(content.getBytes());
 		outputStream.flush();
 		outputStream.close();
-		Object result = parseResponse(httpUrlConnection);
+		Object result = parseResponse(postAddress,httpUrlConnection);
 		httpUrlConnection.disconnect();
 		return result;
 	}
@@ -271,8 +271,8 @@ public class Function {
 				byte[] bufferOut = new byte[1024];
 				while ((bytes = input.read(bufferOut)) != -1) {
 					outputStream.write(bufferOut, 0, bytes);
-					outputStream.write(("\r\n").getBytes());
 				}
+				outputStream.write(("\r\n").getBytes());
 			} else {
 				outputStream.write(("Content-Disposition: form-data; name=\"" + param.name + "\"\r\n\r\n").getBytes());
 				outputStream.write((param.object.toString() + "\r\n").getBytes());
@@ -280,7 +280,7 @@ public class Function {
 		}
 		outputStream.write(("--" + boundary + "\r\n").getBytes());
 		outputStream.close();
-		Object result = parseResponse(httpUrlConnection);
+		Object result = parseResponse(callUrl,httpUrlConnection);
 		httpUrlConnection.disconnect();
 		return result;
 	}
@@ -294,20 +294,20 @@ public class Function {
 		httpUrlConnection.setUseCaches(false);
 		httpUrlConnection.setConnectTimeout(ProxyConfig.timeOut);
 		httpUrlConnection.setReadTimeout(ProxyConfig.timeOut);
-		String cookies = ProxyConfig.controller.getCookies();
+		String cookies = ProxyConfig.controller.getCookies(postAddress);
 		if (cookies != null && !cookies.isEmpty()) {
 			httpUrlConnection.setRequestProperty("Cookie", cookies);
 		}
 		return httpUrlConnection;
 	}
 
-	protected static Object parseResponse(HttpURLConnection httpUrlConnection)
+	protected static Object parseResponse(String postAddress,HttpURLConnection httpUrlConnection)
 			throws ServerException, JSONException, IOException {
 		// save cookie
 		List<String> cookie_list = httpUrlConnection.getHeaderFields().get("Set-Cookie");
 		if (cookie_list != null) {
 			for (String cookie : cookie_list) {
-				ProxyConfig.controller.saveCookie(cookie);
+				ProxyConfig.controller.saveCookie(postAddress,cookie);
 			}
 		}
 		if (httpUrlConnection.getResponseCode() == 200) {

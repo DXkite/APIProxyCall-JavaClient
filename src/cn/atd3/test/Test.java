@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import com.alibaba.fastjson.*;
 
+import cn.atd3.proxy.DefaultController;
 import cn.atd3.proxy.Function;
 import cn.atd3.proxy.Param;
 import cn.atd3.proxy.ProxyConfig;
@@ -20,7 +21,7 @@ import cn.atd3.proxy.exception.ServerException;
 public class Test {
 	static Map<String, String> cookie_save;
 	final static String downloadFileTestPath = "D:\\some.txt";
-	final static String uploadFileTestPath = "D:\\some.txt";
+	final static String uploadFileTestPath = "D:\\copy_paste.jpg";
 	static ProxyObject articleProxy = null;
 	static ProxyObject userProxy = null;
 	// 初始化
@@ -29,55 +30,27 @@ public class Test {
 		articleProxy = new ProxyObject() {
 			@Override
 			public String getCallUrl() {
-				return "http://code4a.i.atd3.cn/open-api/1.0/article";
+				return "http://code4a.atd3.cn/open-api/1.0/article";
+//				return "http://code4a.i.atd3.cn/open-api/1.0/article";
 			}
 		};
 		// 设置调用的API对象接口
 		userProxy = new ProxyObject() {
 			@Override
 			public String getCallUrl() {
-				return "http://code4a.i.atd3.cn/open-api/1.0/user";
+				return "http://code4a.atd3.cn/open-api/1.0/user";
+//				return "http://code4a.i.atd3.cn/open-api/1.0/user";
 			}
 		};
-		
 		// 模拟存储的Cookie
 		cookie_save = new HashMap<String, String>();
 		// 设置控制器
-		ProxyConfig.setController(new ProxyController() {
-			@Override
-			public File saveFile(String mime, InputStream content, long contentLength) {
-				System.out.println("save file =>" + mime + ":" + contentLength);
-				// 模拟保存文件并返回句柄
-				return new File(downloadFileTestPath);
-			}
-
-			@Override
-			public String getCookies() {
-				StringBuffer cookie_str = new StringBuffer();
-				for (Map.Entry<String, String> cookie : cookie_save.entrySet()) {
-					cookie_str.append(cookie.getKey() + "=" + cookie.getValue() + ";");
-				}
-				System.out.println("send cookie => " + cookie_str);
-				return cookie_str.toString();
-			}
-
-			@Override
-			public boolean saveCookie(String cookies) {
-				System.out.println("set cookie =>" + cookies);
-				if (cookies != null) {
-					String cookiestr = cookies.substring(0, cookies.indexOf(";"));
-					int pos = cookiestr.indexOf("=");
-					cookie_save.put(cookiestr.substring(0, pos), cookiestr.substring(pos + 1));
-				}
-				return false;
-			}
-		});
-
+		ProxyConfig.setController(new DefaultController());
 	}
 
 	public static void main(String[] call) {
 		ProxyConfig.setTimeOut(30000);
-		testGetArticleList();
+//		testGetArticleList();
 		// 测试登陆
 //		testUser();
 		// 测试登陆（参数简单化）
@@ -85,9 +58,9 @@ public class Test {
 		// 测试设置文章封面（文件上传、权限报错）
 //		testSetCoverWithoutSign();
 		// 测试设置封面
-//		testSetCoverWithSign();
+		testSetCoverWithSign();
 		// 测试获取封面（文件下载）
-//		testGetCover();
+		testGetCover();
 	}
 	
 	private static void testGetArticleList() {
@@ -117,7 +90,7 @@ public class Test {
 			System.out.println("获取封面文件：");
 			System.out.println(
 					"get cover file => " + new Function(articleProxy, "getCover", true).call(new Param("article", 1)));
-			System.out.println("get cover json => " + new Function(articleProxy, "getCover").call(1));
+//			System.out.println("get cover json => " + new Function(articleProxy, "getCover").call(1));
 		} catch (ProxyException | JSONException | ServerException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -133,7 +106,8 @@ public class Test {
 		try {
 			// 登陆
 			System.out.println("登陆账号：");
-			System.out.println("signin =>" + new Function(userProxy, "signin").call("test", "test_password"));
+//			System.out.println("signin =>" + new Function(userProxy, "signin").call("test", "test_password"));
+			System.out.println("signin =>" + new Function(userProxy, "signin").call("dxkite", "dxkite"));
 			// 设置封面
 			System.out.println("设置封面：");
 			System.out.println("set cover => " + new Function(articleProxy, "setCover").call(new Param("article", 1),
