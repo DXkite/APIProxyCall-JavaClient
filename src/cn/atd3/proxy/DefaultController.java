@@ -166,6 +166,7 @@ public class DefaultController implements ProxyController {
 		String id= getCookieId(url);
 		if (!cookieInfo.containsKey(id)){
 			cookieInfo.put(id,new HashMap<String, String>());
+			initCookie(url);
 		}
 		return cookieInfo.get(id);
 	}

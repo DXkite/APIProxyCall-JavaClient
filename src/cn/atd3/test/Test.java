@@ -38,8 +38,8 @@ public class Test {
 		userProxy = new ProxyObject() {
 			@Override
 			public String getCallUrl() {
-				return "http://code4a.atd3.cn/open-api/1.0/user";
-//				return "http://code4a.i.atd3.cn/open-api/1.0/user";
+//				return "http://code4a.atd3.cn/api/1.0/user";
+				return "http://code4a.i.atd3.cn/api/v1.0/user";
 			}
 		};
 		// 模拟存储的Cookie
@@ -54,13 +54,13 @@ public class Test {
 		// 测试登陆
 //		testUser();
 		// 测试登陆（参数简单化）
-//		testUserEasy();
+		testUserEasy();
 		// 测试设置文章封面（文件上传、权限报错）
 //		testSetCoverWithoutSign();
 		// 测试设置封面
-		testSetCoverWithSign();
+//		testSetCoverWithSign();
 		// 测试获取封面（文件下载）
-		testGetCover();
+//		testGetCover();
 	}
 	
 	private static void testGetArticleList() {
@@ -142,21 +142,19 @@ public class Test {
 	static void testUserEasy() {
 		try {
 			// 登陆
-			System.out.println("登陆：account=test,password=test_password");
-			System.out.println("signin =>" + new Function(userProxy, "signin").call("test", "test_password"));
+//			System.out.println("signin =>" + new Function(userProxy, "signin").call("dxkite", "dxkite"));
 			// 获取登陆信息
-			System.out.println("获取登陆信息：");
+//			System.out.println("获取登陆信息：");
 			
 			// 适配 JavaBean
 			UserInfo userInfo=(UserInfo) userProxy.method("getInfo",UserInfo.class).call();
 			System.out.println("get user info=>" + userInfo);
 			
 			// 退出登陆
-			System.out.println("退出登陆：");
-			System.out.println("signout=>" + new Function(userProxy, "signout").call());
+//			System.out.println("signout=>" + new Function(userProxy, "signout").call());
 			// 尝试不登陆获取信息
-			System.out.println("未登录情况下获取用户信息：");
-			System.out.println("get user info=>" + new Function(userProxy, "getInfo").call());
+//			System.out.println("未登录情况下获取用户信息：");
+//			System.out.println("get user info=>" + new Function(userProxy, "getInfo").call());
 		} catch (JSONException | ProxyException | ServerException | IOException e) {
 			e.printStackTrace();
 		} catch (PermissionException e) {
