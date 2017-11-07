@@ -1,27 +1,15 @@
 package cn.atd3.test;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import com.alibaba.fastjson.*;
-
-import cn.atd3.proxy.DefaultController;
-import cn.atd3.proxy.Function;
-import cn.atd3.proxy.Param;
-import cn.atd3.proxy.ProxyConfig;
-import cn.atd3.proxy.ProxyController;
-import cn.atd3.proxy.ProxyObject;
-import cn.atd3.proxy.exception.PermissionException;
-import cn.atd3.proxy.exception.ProxyException;
-import cn.atd3.proxy.exception.ServerException;
+import cn.atd3.proxy.*;
+import cn.atd3.proxy.exception.*;
 
 public class Test {
 	static Map<String, String> cookie_save;
 	final static String downloadFileTestPath = "D:\\some.txt";
-	final static String uploadFileTestPath = "D:\\copy_paste.jpg";
+	final static String uploadFileTestPath = "E:\\Pictures\\copy_paste.jpg";
 	static ProxyObject articleProxy = null;
 	static ProxyObject userProxy = null;
 	// 初始化
@@ -50,23 +38,29 @@ public class Test {
 
 	public static void main(String[] call) {
 		ProxyConfig.setTimeOut(30000);
+		// 获取文章列表
 //		testGetArticleList();
 		// 测试登陆
 //		testUser();
 		// 测试登陆（参数简单化）
-		testUserEasy();
+//		testUserEasy();
 		// 测试设置文章封面（文件上传、权限报错）
 //		testSetCoverWithoutSign();
 		// 测试设置封面
-//		testSetCoverWithSign();
+		testSetCoverWithSign();
 		// 测试获取封面（文件下载）
 //		testGetCover();
+		// 清除cookie
+//		System.out.println("clear cookie => "+ProxyConfig.getController().clearCookies());
 	}
 	
 	private static void testGetArticleList() {
 		try {
-			List<Article> list=(List<Article>) articleProxy.method("getList",Article.class).call(1,10);
-			System.out.println(list);
+			 
+			Object list=articleProxy.method("getList",Article.class).call(1,10);
+			if (list instanceof List<?>){
+				System.out.println(list);
+			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -149,12 +143,11 @@ public class Test {
 			// 适配 JavaBean
 			UserInfo userInfo=(UserInfo) userProxy.method("getInfo",UserInfo.class).call();
 			System.out.println("get user info=>" + userInfo);
-			System.out.println("clear cookie => "+ProxyConfig.getController().clearCookies());
 			// 退出登陆
-//			System.out.println("signout=>" + new Function(userProxy, "signout").call());
+			System.out.println("signout=>" + new Function(userProxy, "signout").call());
 			// 尝试不登陆获取信息
 //			System.out.println("未登录情况下获取用户信息：");
-//			System.out.println("get user info=>" + new Function(userProxy, "getInfo").call());
+			System.out.println("get user info=>" + new Function(userProxy, "getInfo").call());
 		} catch (JSONException | ProxyException | ServerException | IOException e) {
 			e.printStackTrace();
 		} catch (PermissionException e) {

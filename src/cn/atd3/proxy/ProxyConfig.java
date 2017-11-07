@@ -1,8 +1,5 @@
 package cn.atd3.proxy;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 public class ProxyConfig {
 	protected static ProxyController controller = null;
 	protected static Integer timeOut = 3000;
