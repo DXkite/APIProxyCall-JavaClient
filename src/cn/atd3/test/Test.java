@@ -30,7 +30,7 @@ public class Test {
 		articleProxy = new ProxyObject() {
 			@Override
 			public String getCallUrl() {
-				return "http://code4a.atd3.cn/open-api/1.0/article";
+				return "http://code4a.i.atd3.cn/api/v1.0/article";
 //				return "http://code4a.i.atd3.cn/open-api/1.0/article";
 			}
 		};
@@ -142,14 +142,14 @@ public class Test {
 	static void testUserEasy() {
 		try {
 			// 登陆
-//			System.out.println("signin =>" + new Function(userProxy, "signin").call("dxkite", "dxkite"));
+			System.out.println("signin =>" + new Function(userProxy, "signin").call("dxkite", "dxkite"));
 			// 获取登陆信息
 //			System.out.println("获取登陆信息：");
 			
 			// 适配 JavaBean
 			UserInfo userInfo=(UserInfo) userProxy.method("getInfo",UserInfo.class).call();
 			System.out.println("get user info=>" + userInfo);
-			
+			System.out.println("clear cookie => "+ProxyConfig.getController().clearCookies());
 			// 退出登陆
 //			System.out.println("signout=>" + new Function(userProxy, "signout").call());
 			// 尝试不登陆获取信息

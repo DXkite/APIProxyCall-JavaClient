@@ -313,15 +313,14 @@ public class Function {
 		if (httpUrlConnection.getResponseCode() == 200) {
 			// JSON
 			if (httpUrlConnection.getContentType().contains("json")) {
-				System.out.println("content is json");
 				try {
-
 					InputStream inputStream = httpUrlConnection.getInputStream();
 					BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
 					String l, jsonstr = "";
 					while (null != (l = r.readLine())) {
 						jsonstr += l + '\n';
 					}
+					System.out.println("content is json => "+jsonstr);
 					return JSON.parse(jsonstr);
 				} catch (IOException e) {
 					throw new ServerException("Server response read error", e);

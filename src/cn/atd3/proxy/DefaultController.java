@@ -49,6 +49,7 @@ public class DefaultController implements ProxyController {
 					System.out.println("load cookie from file:" + line);
 					setCookie(url,line);
 				}
+				reader.close();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 				return false;

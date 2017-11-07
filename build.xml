@@ -44,7 +44,7 @@
         <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <antcall target="build"/>
     </target>
-    <target name="Test">
+    <target name="test">
         <java classname="cn.atd3.test.Test" failonerror="true" fork="yes">
             <classpath refid="ServerCall.classpath"/>
         </java>

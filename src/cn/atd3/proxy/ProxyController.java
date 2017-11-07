@@ -28,4 +28,15 @@ public interface ProxyController {
 	 * @return
 	 */
 	boolean saveCookie(String url, String cookie);
+	
+	public default boolean clearCookies() {
+		File filesDir = new File(ProxyConfig.cookiePath);
+		File[] files = filesDir.listFiles();
+        for (File cookieFile :files) {
+            if (cookieFile.isFile()){
+                System.out.println("delete ->  "+ cookieFile.getPath() + " = "+ cookieFile.delete() );
+            }
+        }
+		return filesDir.delete();
+	}
 }
