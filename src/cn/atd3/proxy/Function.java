@@ -15,7 +15,7 @@ import java.util.List;
 
 import com.alibaba.fastjson.*;
 
-import cn.atd3.proxy.exception.MethodNoFoundException;
+import cn.atd3.proxy.exception.MethodNotFoundException;
 import cn.atd3.proxy.exception.PermissionException;
 import cn.atd3.proxy.exception.ProxyException;
 import cn.atd3.proxy.exception.ServerException;
@@ -216,7 +216,7 @@ public class Function {
 					if ("PermissionDeny".equalsIgnoreCase(name)) {
 						throw new PermissionException(error.getString("message"));
 					} else if ("MethodNotFound".equalsIgnoreCase(name)) {
-						throw new MethodNoFoundException(error.getString("message"));
+						throw new MethodNotFoundException(error.getString("message"));
 					} else {
 						throw new ProxyException(name + ":" + error.getString("message"));
 					}
