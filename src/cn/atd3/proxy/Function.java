@@ -1,24 +1,10 @@
 package cn.atd3.proxy;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.io.*;
+import java.net.*;
+import java.util.*;
 import com.alibaba.fastjson.*;
-
-import cn.atd3.proxy.exception.MethodNotFoundException;
-import cn.atd3.proxy.exception.PermissionException;
-import cn.atd3.proxy.exception.ProxyException;
-import cn.atd3.proxy.exception.ServerException;
+import cn.atd3.proxy.exception.*;
 
 public class Function {
 
@@ -26,7 +12,8 @@ public class Function {
 	protected String method;
 	protected boolean returnFile = false;
 	protected Class<?> returnType = null;
-
+	protected static JSONObject serverException=null;
+	
 	public Function(ProxyObject object, String method) {
 		this(object.getCallUrl(),method);
 	}
@@ -294,6 +281,8 @@ public class Function {
 		httpUrlConnection.setUseCaches(false);
 		httpUrlConnection.setConnectTimeout(ProxyConfig.timeOut);
 		httpUrlConnection.setReadTimeout(ProxyConfig.timeOut);
+		// 开启异常处理
+		httpUrlConnection.setRequestProperty("Debug","atd-proxy-tool");
 		String cookies = ProxyConfig.controller.getCookies(postAddress);
 		if (cookies != null && !cookies.isEmpty()) {
 			httpUrlConnection.setRequestProperty("Cookie", cookies);
@@ -313,25 +302,68 @@ public class Function {
 		if (httpUrlConnection.getResponseCode() == 200) {
 			// JSON
 			if (httpUrlConnection.getContentType().contains("json")) {
-				try {
-					InputStream inputStream = httpUrlConnection.getInputStream();
-					BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
-					String l, jsonstr = "";
-					while (null != (l = r.readLine())) {
-						jsonstr += l + '\n';
-					}
-					System.out.println("content is json => "+jsonstr);
-					return JSON.parse(jsonstr);
-				} catch (IOException e) {
-					throw new ServerException("Server response read error", e);
-				}
+				return parseJsonFromInputStream(httpUrlConnection.getInputStream());
 			} else {
 				System.out.println("content is not json => " + httpUrlConnection.getContentType());
 				return ProxyConfig.controller.saveFile(httpUrlConnection.getContentType(),
 						httpUrlConnection.getInputStream(), httpUrlConnection.getContentLength());
 			}
+		} else if (httpUrlConnection.getResponseCode() == 500) {
+			JSONObject obj=(JSONObject) parseJsonFromInputStream(httpUrlConnection.getErrorStream());
+			JSONObject error= obj.getJSONObject("error");
+			serverException=error;
+			JSONObject data=error.getJSONObject("data");
+			String errorMessage=error.getString("name") + " "+ error.getString("message") + "\n\tat " + data.getString("file") + ":" + data.getString("line");
+			if (data.containsKey("backtrace")) {
+				errorMessage+="\n"+remoteBacktrace(data.getJSONArray("backtrace"), "\tat ");
+			}
+			throw new ServerException(errorMessage);  
 		} else {
 			throw new ServerException("Server status error (" + httpUrlConnection.getResponseCode() + ")");
 		}
+	}
+	
+	protected static Object parseJsonFromInputStream(InputStream inputStream) throws ServerException {
+		try {
+
+			BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
+			String l, jsonstr = "";
+			while (null != (l = r.readLine())) {
+				jsonstr += l + '\n';
+			}
+			return JSON.parse(jsonstr);
+		} catch (IOException e) {
+			throw new ServerException("server response read error", e);
+		}
+	}
+	
+	protected static String remoteBacktrace(JSONArray backtrace,String perfix) {
+		Iterator<Object> it = backtrace.iterator();
+		StringBuffer strbuf=new StringBuffer();
+		while (it.hasNext()) {
+			StringBuffer line=new StringBuffer(perfix);
+			JSONObject ob = (JSONObject) it.next();
+			if (ob.containsKey("file")) {
+				line.append(ob.getString("file")+":"+ob.getString("line"));
+			}
+			line.append(' ');
+			if (ob.containsKey("class")) {
+				line.append(ob.getString("class"));
+				line.append(ob.getString("type"));
+				line.append(ob.getString("function"));
+			}else {
+				line.append(ob.getString("function"));
+			}
+			if (ob.containsKey("args")) {
+				line.append(" " +ob.getString("args"));
+			}
+			line.append('\n');
+			strbuf.append(line);
+		}
+		return strbuf.toString();
+	}
+
+	public static JSONObject getServerException() {
+		return serverException;
 	}
 }

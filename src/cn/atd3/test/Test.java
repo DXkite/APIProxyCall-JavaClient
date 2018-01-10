@@ -27,13 +27,35 @@ public class Test {
 			@Override
 			public String getCallUrl() {
 //				return "http://code4a.atd3.cn/api/1.0/user";
-				return "http://code4a.i.atd3.cn/api/v1.0/user";
+				return "http://code4a.atd3.org/api/v1.0/user";
 			}
 		};
 		// 模拟存储的Cookie
 		cookie_save = new HashMap<String, String>();
 		// 设置控制器
 		ProxyConfig.setController(new DefaultController());
+	}
+	static void testUserEasy() {
+		try {
+			// 登陆
+			System.out.println("signin =>" + new Function(userProxy, "signin").call("dxkite-admin", "#xk:tew0rd"));
+			// 获取登陆信息
+//			System.out.println("获取登陆信息：");
+			
+			// 适配 JavaBean
+			UserInfo userInfo=(UserInfo) userProxy.method("getInfo",UserInfo.class).call();
+			System.out.println("get user info=>" + userInfo);
+			// 退出登陆
+			System.out.println("signout=>" + new Function(userProxy, "signout").call());
+			// 尝试不登陆获取信息
+//			System.out.println("未登录情况下获取用户信息：");
+			System.out.println("get user info=>" + new Function(userProxy, "getInfo").call());
+		} catch (JSONException | ProxyException | ServerException | IOException e) {
+			e.printStackTrace();
+		} catch (PermissionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static void main(String[] call) {
@@ -43,11 +65,11 @@ public class Test {
 		// 测试登陆
 //		testUser();
 		// 测试登陆（参数简单化）
-//		testUserEasy();
+		testUserEasy();
 		// 测试设置文章封面（文件上传、权限报错）
 //		testSetCoverWithoutSign();
 		// 测试设置封面
-		testSetCoverWithSign();
+//		testSetCoverWithSign();
 		// 测试获取封面（文件下载）
 //		testGetCover();
 		// 清除cookie
@@ -133,28 +155,6 @@ public class Test {
 		}
 	}
 
-	static void testUserEasy() {
-		try {
-			// 登陆
-			System.out.println("signin =>" + new Function(userProxy, "signin").call("dxkite", "dxkite"));
-			// 获取登陆信息
-//			System.out.println("获取登陆信息：");
-			
-			// 适配 JavaBean
-			UserInfo userInfo=(UserInfo) userProxy.method("getInfo",UserInfo.class).call();
-			System.out.println("get user info=>" + userInfo);
-			// 退出登陆
-			System.out.println("signout=>" + new Function(userProxy, "signout").call());
-			// 尝试不登陆获取信息
-//			System.out.println("未登录情况下获取用户信息：");
-			System.out.println("get user info=>" + new Function(userProxy, "getInfo").call());
-		} catch (JSONException | ProxyException | ServerException | IOException e) {
-			e.printStackTrace();
-		} catch (PermissionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
 	static void testUser() {
 		try {
