@@ -5,7 +5,7 @@ public class ProxyConfig {
 	protected static Integer timeOut = 3000;
 	protected static Integer callid = 0;
 	protected static String cookiePath = ".remote/cookie";
-
+	
 	public static ProxyController getController() {
 		return controller;
 	}

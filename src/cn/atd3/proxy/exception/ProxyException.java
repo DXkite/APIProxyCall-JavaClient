@@ -1,7 +1,9 @@
 package cn.atd3.proxy.exception;
 
 public class ProxyException extends RuntimeException {
-
+	protected Integer code;
+	protected String name;
+	
 	/**
 	 * 
 	 */
@@ -32,4 +34,13 @@ public class ProxyException extends RuntimeException {
 		// TODO Auto-generated constructor stub
 	}
 
+	public ProxyException(String name, Integer code, String message) {
+		super(message);
+		this.name =name;
+		this.code =code;
+	}
+	
+	public Integer getCode() {
+		return this.code;
+	}
 }

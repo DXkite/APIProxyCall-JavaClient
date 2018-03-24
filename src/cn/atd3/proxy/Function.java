@@ -200,12 +200,14 @@ public class Function {
 				if (obj.containsKey("error")) {
 					JSONObject error = obj.getJSONObject("error");
 					String name = error.getString("name");
+					Integer code =error.getInteger("code");
+					
 					if ("PermissionDeny".equalsIgnoreCase(name)) {
 						throw new PermissionException(error.getString("message"));
 					} else if ("MethodNotFound".equalsIgnoreCase(name)) {
 						throw new MethodNotFoundException(error.getString("message"));
 					} else {
-						throw new ProxyException(name + ":" + error.getString("message"));
+						throw new ProxyException(name ,code,error.getString("message"));
 					}
 				}
 			}

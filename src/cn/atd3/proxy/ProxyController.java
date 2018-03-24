@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
-public interface ProxyController {
+public abstract class ProxyController {
 	/**
 	 * 获取保存的Cookie字符串集合
 	 * @return
 	 */
-	public String getCookies(String url);
+	abstract public String getCookies(String url);
 	
 	/**
 	 * 保存从服务器下载的文件
@@ -20,16 +20,16 @@ public interface ProxyController {
 	 * @return
 	 * @throws IOException 
 	 */
-	public File saveFile(String contentType, InputStream content, long contentLength) throws IOException;
+	abstract public File saveFile(String contentType, InputStream content, long contentLength) throws IOException;
 	
 	/**
 	 * 保存服务器发送的Cookie字符串
 	 * @param cookies
 	 * @return
 	 */
-	boolean saveCookie(String url, String cookie);
+	abstract boolean saveCookie(String url, String cookie);
 	
-	public default boolean clearCookies() {
+	public boolean clearCookies() {
 		File filesDir = new File(ProxyConfig.cookiePath);
 		File[] files = filesDir.listFiles();
         for (File cookieFile :files) {

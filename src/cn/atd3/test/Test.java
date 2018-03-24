@@ -41,7 +41,13 @@ public class Test {
 			System.out.println("signin =>" + new Function(userProxy, "signin").call("dxkite-admin", "#xk:tew0rd"));
 			// 获取登陆信息
 //			System.out.println("获取登陆信息：");
-			
+			ProxyObject user=new ProxyObject() {
+				@Override
+				public String getCallUrl() {
+					return "http://code4a.atd3.cn/api/1.0/user";
+				}
+			};
+			// new Function()
 			// 适配 JavaBean
 			UserInfo userInfo=(UserInfo) userProxy.method("getInfo",UserInfo.class).call();
 			System.out.println("get user info=>" + userInfo);

@@ -15,7 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DefaultController implements ProxyController {
+public class DefaultController extends ProxyController {
 
 	final String userCookie = "user.cookie";
 	String cookiePath = null;
