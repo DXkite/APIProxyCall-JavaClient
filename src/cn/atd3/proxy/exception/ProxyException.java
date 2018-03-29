@@ -43,4 +43,10 @@ public class ProxyException extends RuntimeException {
 	public Integer getCode() {
 		return this.code;
 	}
+
+	public String getName() {
+		return name;
+	}
+	
+	
 }
